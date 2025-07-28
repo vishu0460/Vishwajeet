@@ -1,0 +1,2595 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hotel Booking System</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-color: #4e73df;
+        --secondary-color: #858796;
+        --success-color: #1cc88a;
+        --info-color: #36b9cc;
+        --warning-color: #f6c23e;
+        --danger-color: #e74a3b;
+        --light-color: #f8f9fc;
+        --dark-color: #5a5c69;
+      }
+
+      body {
+        font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #f8f9fc;
+      }
+
+      .card {
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card-header {
+        background-color: var(--primary-color);
+        border-bottom: none;
+        color: white;
+        font-weight: 600;
+      }
+
+      .room-calendar {
+        overflow-x: auto;
+        background: white;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.1);
+      }
+
+      .room-cell {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e0e0e0;
+        margin: 2px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+        position: relative;
+        border-radius: 4px;
+      }
+
+      .room-cell:hover {
+        transform: scale(1.1);
+        z-index: 2;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .available {
+        background-color: #e8f5e9;
+      }
+
+      .booked {
+        background-color: #ffebee;
+        position: relative;
+      }
+
+      .booked:after {
+        content: "✓";
+        color: #c62828;
+        font-weight: bold;
+      }
+
+      .selected {
+        background-color: #bbdefb;
+        box-shadow: 0 0 0 2px var(--primary-color);
+      }
+
+      .booking-card {
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+
+      .booking-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+      }
+
+      .status-badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+      }
+
+      .room-type-badge {
+        font-size: 0.7rem;
+        padding: 0.25em 0.5em;
+      }
+
+      .excel-btn {
+        background-color: #1d6f42;
+        color: white;
+        border: none;
+      }
+
+      .excel-btn:hover {
+        background-color: #165834;
+        color: white;
+      }
+
+      .tooltip-inner {
+        max-width: 300px;
+      }
+
+      #timelineChart {
+        width: 100% !important;
+      }
+
+      .weekend {
+        background-color: #fff8e1;
+      }
+
+      .today {
+        background-color: #fffde7;
+        border: 2px solid var(--warning-color) !important;
+      }
+
+      .progress-bar {
+        transition: width 0.6s ease;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .btn-primary:hover {
+        background-color: #3a5bc7;
+        border-color: #3a5bc7;
+      }
+
+      .table-hover tbody tr:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+      }
+
+      .badge-success {
+        background-color: var(--success-color);
+      }
+
+      .badge-warning {
+        background-color: var(--warning-color);
+        color: #1f2d3d;
+      }
+
+      .badge-danger {
+        background-color: var(--danger-color);
+      }
+
+      .badge-info {
+        background-color: var(--info-color);
+      }
+
+      .badge-secondary {
+        background-color: var(--secondary-color);
+      }
+
+      .badge-primary {
+        background-color: var(--primary-color);
+      }
+
+      .alert-position {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1100;
+        animation: slideIn 0.5s forwards;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background-color: #f00;
+        opacity: 0;
+        z-index: 9999;
+        animation: confetti 5s ease-in-out;
+      }
+
+      @keyframes confetti {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(1000px) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      .pulse {
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .shake {
+        animation: shake 0.5s;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+          transform: translateX(-5px);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+          transform: translateX(5px);
+        }
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #printSection,
+        #printSection * {
+          visibility: visible;
+        }
+        #printSection {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          background-color: white;
+          padding: 20px;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .invoice-header {
+          border-bottom: 2px solid #4e73df;
+          margin-bottom: 20px;
+          padding-bottom: 20px;
+        }
+        .invoice-table th {
+          background-color: #f8f9fa !important;
+        }
+        .total-row {
+          font-weight: bold;
+          background-color: #f8f9fa !important;
+        }
+      }
+
+      .loading-spinner {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .room-availability-chart {
+        height: 300px;
+        margin-top: 20px;
+      }
+
+      .floating-action-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        z-index: 1000;
+        transition: all 0.3s;
+      }
+
+      .floating-action-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      /* New styles for improved UI */
+      .form-label {
+        font-weight: 600;
+        color: var(--dark-color);
+      }
+
+      .input-group-text {
+        min-width: 40px;
+        justify-content: center;
+      }
+
+      .card-header h5 {
+        font-size: 1.1rem;
+      }
+
+      .table th {
+        font-weight: 600;
+        color: var(--dark-color);
+      }
+
+      .badge {
+        font-weight: 500;
+      }
+
+      .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .modal-header {
+        padding: 1rem 1.5rem;
+      }
+
+      .modal-title {
+        font-weight: 600;
+      }
+
+      /* Print-specific styles */
+      .invoice-header {
+        border-bottom: 2px solid var(--primary-color);
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+      }
+
+      .invoice-title {
+        color: var(--primary-color);
+        font-weight: 700;
+      }
+
+      .hotel-logo {
+        max-width: 150px;
+        height: auto;
+      }
+
+      .invoice-table th {
+        background-color: #f8f9fa !important;
+        font-weight: 600;
+      }
+
+      .total-row {
+        font-weight: bold;
+        background-color: #f8f9fa !important;
+      }
+
+      .signature-area {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px dashed #ccc;
+      }
+
+      .terms-conditions {
+        margin-top: 30px;
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      /* Print section styles */
+      #printSection {
+        display: none;
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #printSection,
+        #printSection * {
+          visibility: visible;
+        }
+        #printSection {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          padding: 20px;
+          background-color: white;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-table th {
+          background-color: #f8f9fa !important;
+        }
+        .print-total-row {
+          font-weight: bold;
+          background-color: #f8f9fa !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div
+      class="floating-action-btn pulse"
+      id="quickBookBtn"
+      title="Quick Booking"
+    >
+      <i class="fas fa-plus"></i>
+    </div>
+
+    <div class="container py-4">
+      <div class="text-center mb-4">
+        <h1 class="display-4 fw-bold text-primary">🏨 Hotel Booking System</h1>
+        <p class="lead text-muted">Manage your hotel reservations with ease</p>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-5 mb-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">
+                <i class="fas fa-calendar-plus me-2"></i>Booking Form
+              </h5>
+            </div>
+            <div class="card-body">
+              <form id="bookingForm">
+                <div class="mb-3">
+                  <label for="guestName" class="form-label"
+                    >Guest Name <span class="text-danger">*</span></label
+                  >
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="fas fa-user"></i
+                    ></span>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="guestName"
+                      placeholder="John Doe"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="roomSelect" class="form-label"
+                      >Room <span class="text-danger">*</span></label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fas fa-bed"></i
+                      ></span>
+                      <select class="form-select" id="roomSelect" required>
+                        <option value="">Select a room</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="numGuests" class="form-label"
+                      >Guests <span class="text-danger">*</span></label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fas fa-users"></i
+                      ></span>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="numGuests"
+                        min="1"
+                        max="10"
+                        value="1"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="checkIn" class="form-label"
+                      >Check In <span class="text-danger">*</span></label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fas fa-calendar-day"></i
+                      ></span>
+                      <input
+                        type="text"
+                        class="form-control datepicker"
+                        id="checkIn"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="checkOut" class="form-label"
+                      >Check Out <span class="text-danger">*</span></label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fas fa-calendar-day"></i
+                      ></span>
+                      <input
+                        type="text"
+                        class="form-control datepicker"
+                        id="checkOut"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="status" class="form-label"
+                    >Status <span class="text-danger">*</span></label
+                  >
+                  <select class="form-select" id="status" required>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Checked-In">Checked-In</option>
+                    <option value="Checked-Out">Checked-Out</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="specialRequests" class="form-label"
+                    >Special Requests</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="specialRequests"
+                    rows="3"
+                    placeholder="Any special requirements..."
+                  ></textarea>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-primary flex-grow-1"
+                    id="saveBooking"
+                  >
+                    <i class="fas fa-save me-2"></i>Save Booking
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="newBooking"
+                  >
+                    <i class="fas fa-plus me-2"></i>New
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-warning"
+                    id="updateBooking"
+                    disabled
+                  >
+                    <i class="fas fa-edit me-2"></i>Update
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="deleteBooking"
+                    disabled
+                  >
+                    <i class="fas fa-trash me-2"></i>Delete
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7 mb-4">
+          <div class="card shadow-sm h-100">
+            <div
+              class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">
+                <i class="fas fa-calendar-alt me-2"></i>Room Availability
+              </h5>
+              <div class="d-flex align-items-center">
+                <button
+                  class="btn btn-sm btn-light me-2"
+                  id="prevMonth"
+                  title="Previous month"
+                >
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <h6 class="mb-0 mx-2" id="currentMonth">August 2020</h6>
+                <button
+                  class="btn btn-sm btn-light me-3"
+                  id="nextMonth"
+                  title="Next month"
+                >
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+                <select
+                  class="form-select form-select-sm me-2 w-auto"
+                  id="roomTypeFilter"
+                >
+                  <option value="all">All Rooms</option>
+                  <option value="single">Single</option>
+                  <option value="double">Double</option>
+                  <option value="suite">Suite</option>
+                </select>
+                <button
+                  class="btn btn-sm excel-btn"
+                  id="exportExcel"
+                  title="Export to Excel"
+                >
+                  <i class="fas fa-file-excel me-1"></i>Export
+                </button>
+              </div>
+            </div>
+            <div class="card-body p-2">
+              <div id="roomCalendar" class="room-calendar p-3"></div>
+              <div class="room-availability-chart">
+                <canvas id="availabilityChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mt-2">
+        <div
+          class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0"><i class="fas fa-list me-2"></i>Bookings</h5>
+          <div class="d-flex">
+            <input
+              type="text"
+              class="form-control form-control-sm me-2"
+              id="searchBookings"
+              placeholder="Search bookings..."
+              style="width: 200px"
+            />
+            <div class="btn-group">
+              <button
+                class="btn btn-sm btn-light dropdown-toggle"
+                type="button"
+                id="filterDropdown"
+                data-bs-toggle="dropdown"
+              >
+                <i class="fas fa-filter me-1"></i>Filter
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a
+                    class="dropdown-item filter-option"
+                    href="#"
+                    data-filter="all"
+                    >All Bookings</a
+                  >
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a
+                    class="dropdown-item filter-option"
+                    href="#"
+                    data-filter="Confirmed"
+                    >Confirmed</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item filter-option"
+                    href="#"
+                    data-filter="Pending"
+                    >Pending</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item filter-option"
+                    href="#"
+                    data-filter="Cancelled"
+                    >Cancelled</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item filter-option"
+                    href="#"
+                    data-filter="Checked-In"
+                    >Checked-In</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item filter-option"
+                    href="#"
+                    data-filter="Checked-Out"
+                    >Checked-Out</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover" id="bookingsTable">
+              <thead class="table-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Guest</th>
+                  <th>Room</th>
+                  <th>Dates</th>
+                  <th>Nights</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Bookings will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="text-muted small" id="bookingStats"></div>
+            <nav>
+              <ul class="pagination pagination-sm mb-0" id="pagination">
+                <!-- Pagination will be added by JavaScript -->
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Details Modal -->
+    <div class="modal fade" id="bookingDetailsModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Booking Details</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body" id="bookingDetailsContent">
+            <!-- Content will be loaded by JavaScript -->
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" id="printBooking">
+              <i class="fas fa-print me-2"></i>Print Bill
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden print section -->
+    <div id="printSection" style="display: none"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize date pickers with restrictions
+        flatpickr("#checkIn", {
+          dateFormat: "Y-m-d",
+          minDate: "today",
+          defaultDate: new Date(),
+          onChange: function (selectedDates, dateStr) {
+            const checkOutPicker =
+              document.getElementById("checkOut")._flatpickr;
+            checkOutPicker.set(
+              "minDate",
+              new Date(selectedDates[0].getTime() + 86400000)
+            );
+
+            if (
+              checkOutPicker.selectedDates[0] &&
+              checkOutPicker.selectedDates[0] < selectedDates[0]
+            ) {
+              checkOutPicker.setDate(
+                new Date(selectedDates[0].getTime() + 86400000)
+              );
+            }
+
+            // Update calendar selection
+            updateCalendarSelection();
+          },
+        });
+
+        flatpickr("#checkOut", {
+          dateFormat: "Y-m-d",
+          minDate: new Date(new Date().getTime() + 86400000),
+          defaultDate: new Date(new Date().getTime() + 86400000 * 2),
+          onChange: function () {
+            updateCalendarSelection();
+          },
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Sample data - in a real app, this would come from a database
+        let bookings = JSON.parse(localStorage.getItem("hotelBookings")) || [];
+        let rooms = [
+          {
+            number: 101,
+            type: "single",
+            price: 2500,
+            floor: 1,
+            maxOccupancy: 1,
+          },
+          {
+            number: 102,
+            type: "single",
+            price: 2500,
+            floor: 1,
+            maxOccupancy: 1,
+          },
+          {
+            number: 103,
+            type: "double",
+            price: 4000,
+            floor: 1,
+            maxOccupancy: 2,
+          },
+          {
+            number: 104,
+            type: "double",
+            price: 4000,
+            floor: 1,
+            maxOccupancy: 2,
+          },
+          {
+            number: 201,
+            type: "suite",
+            price: 7500,
+            floor: 2,
+            maxOccupancy: 4,
+          },
+          {
+            number: 202,
+            type: "suite",
+            price: 7500,
+            floor: 2,
+            maxOccupancy: 4,
+          },
+          {
+            number: 203,
+            type: "double",
+            price: 4500,
+            floor: 2,
+            maxOccupancy: 2,
+          },
+          {
+            number: 301,
+            type: "suite",
+            price: 9000,
+            floor: 3,
+            maxOccupancy: 4,
+          },
+          {
+            number: 302,
+            type: "single",
+            price: 3000,
+            floor: 3,
+            maxOccupancy: 1,
+          },
+        ];
+
+        let currentDate = new Date();
+        let currentEditingId = null;
+        let currentFilter = "all";
+        let currentSearch = "";
+        let currentPage = 1;
+        const bookingsPerPage = 10;
+        let availabilityChart = null;
+
+        // Initialize the app
+        initRoomsDropdown();
+        renderCalendar();
+        renderBookingsTable();
+        updateBookingStats();
+        renderAvailabilityChart();
+
+        // Event listeners
+        document
+          .getElementById("saveBooking")
+          .addEventListener("click", saveBooking);
+        document
+          .getElementById("newBooking")
+          .addEventListener("click", newBooking);
+        document
+          .getElementById("updateBooking")
+          .addEventListener("click", updateBooking);
+        document
+          .getElementById("deleteBooking")
+          .addEventListener("click", deleteBooking);
+        document
+          .getElementById("prevMonth")
+          .addEventListener("click", prevMonth);
+        document
+          .getElementById("nextMonth")
+          .addEventListener("click", nextMonth);
+        document
+          .getElementById("roomTypeFilter")
+          .addEventListener("change", function () {
+            renderCalendar();
+            renderAvailabilityChart();
+          });
+        document
+          .getElementById("exportExcel")
+          .addEventListener("click", exportToExcel);
+        document
+          .getElementById("searchBookings")
+          .addEventListener("input", function () {
+            currentSearch = this.value.toLowerCase();
+            currentPage = 1;
+            renderBookingsTable();
+          });
+        document.querySelectorAll(".filter-option").forEach((option) => {
+          option.addEventListener("click", function (e) {
+            e.preventDefault();
+            currentFilter = this.dataset.filter;
+            currentPage = 1;
+            document.querySelector(
+              "#filterDropdown"
+            ).textContent = `Filter: ${this.textContent}`;
+            renderBookingsTable();
+          });
+        });
+        document
+          .getElementById("printBooking")
+          .addEventListener("click", printBooking);
+        document
+          .getElementById("quickBookBtn")
+          .addEventListener("click", quickBooking);
+        document
+          .getElementById("roomSelect")
+          .addEventListener("change", updateMaxGuests);
+        document
+          .getElementById("numGuests")
+          .addEventListener("change", validateGuestCount);
+
+        function initRoomsDropdown() {
+          const roomSelect = document.getElementById("roomSelect");
+          roomSelect.innerHTML = '<option value="">Select a room</option>';
+
+          rooms.forEach((room) => {
+            const option = document.createElement("option");
+            option.value = room.number;
+            option.textContent = `Room ${room.number} (${
+              room.type.charAt(0).toUpperCase() + room.type.slice(1)
+            }, ₹${room.price.toLocaleString("en-IN")}/night)`;
+            option.dataset.type = room.type;
+            option.dataset.price = room.price;
+            option.dataset.maxOccupancy = room.maxOccupancy;
+            roomSelect.appendChild(option);
+          });
+        }
+
+        function updateMaxGuests() {
+          const roomSelect = document.getElementById("roomSelect");
+          const numGuests = document.getElementById("numGuests");
+          const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+
+          if (selectedOption.value) {
+            const maxOccupancy = parseInt(selectedOption.dataset.maxOccupancy);
+            numGuests.max = maxOccupancy;
+
+            if (parseInt(numGuests.value) > maxOccupancy) {
+              numGuests.value = maxOccupancy;
+              showAlert(
+                `This room can only accommodate ${maxOccupancy} guests`,
+                "warning"
+              );
+            }
+          }
+        }
+
+        function validateGuestCount() {
+          const numGuests = document.getElementById("numGuests");
+          const roomSelect = document.getElementById("roomSelect");
+          const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+
+          if (
+            selectedOption.value &&
+            parseInt(numGuests.value) >
+              parseInt(selectedOption.dataset.maxOccupancy)
+          ) {
+            numGuests.classList.add("is-invalid");
+            showAlert(
+              `This room can only accommodate ${selectedOption.dataset.maxOccupancy} guests`,
+              "danger"
+            );
+          } else {
+            numGuests.classList.remove("is-invalid");
+          }
+        }
+
+        function renderCalendar() {
+          showLoading();
+
+          setTimeout(() => {
+            const calendarEl = document.getElementById("roomCalendar");
+            calendarEl.innerHTML = "";
+
+            const roomTypeFilter =
+              document.getElementById("roomTypeFilter").value;
+            const filteredRooms =
+              roomTypeFilter === "all"
+                ? rooms
+                : rooms.filter((room) => room.type === roomTypeFilter);
+
+            // Update month display
+            const monthYear = currentDate.toLocaleString("default", {
+              month: "long",
+              year: "numeric",
+            });
+            document.getElementById("currentMonth").textContent = monthYear;
+
+            // Create header with days
+            const daysInMonth = new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth() + 1,
+              0
+            ).getDate();
+
+            const firstDayOfMonth = new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              1
+            ).getDay();
+
+            const headerRow = document.createElement("div");
+            headerRow.style.display = "flex";
+            headerRow.style.marginBottom = "10px";
+
+            const emptyCell = document.createElement("div");
+            emptyCell.style.width = "120px";
+            emptyCell.style.margin = "2px";
+            headerRow.appendChild(emptyCell);
+
+            // Add day names header
+            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            for (let i = 0; i < 7; i++) {
+              const dayNameCell = document.createElement("div");
+              dayNameCell.style.width = "32px";
+              dayNameCell.style.margin = "2px";
+              dayNameCell.style.textAlign = "center";
+              dayNameCell.style.fontWeight = "bold";
+              dayNameCell.style.fontSize = "12px";
+              dayNameCell.textContent = dayNames[i];
+              headerRow.appendChild(dayNameCell);
+            }
+
+            calendarEl.appendChild(headerRow);
+
+            // Create date header row
+            const dateHeaderRow = document.createElement("div");
+            dateHeaderRow.style.display = "flex";
+            dateHeaderRow.style.marginBottom = "10px";
+
+            const roomLabelHeader = document.createElement("div");
+            roomLabelHeader.style.width = "120px";
+            roomLabelHeader.style.margin = "2px";
+            dateHeaderRow.appendChild(roomLabelHeader);
+
+            // Calculate the starting position based on the first day of the month
+            for (let i = 0; i < firstDayOfMonth; i++) {
+              const emptyDayCell = document.createElement("div");
+              emptyDayCell.style.width = "32px";
+              emptyDayCell.style.margin = "2px";
+              dateHeaderRow.appendChild(emptyDayCell);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+              const dayCell = document.createElement("div");
+              dayCell.className = "room-cell";
+              dayCell.textContent = day;
+              dayCell.style.fontWeight = "bold";
+              dayCell.style.width = "32px";
+
+              // Highlight today's date
+              const today = new Date();
+              if (
+                day === today.getDate() &&
+                currentDate.getMonth() === today.getMonth() &&
+                currentDate.getFullYear() === today.getFullYear()
+              ) {
+                dayCell.classList.add("today");
+              }
+
+              // Highlight weekends
+              const date = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                day
+              );
+              if (date.getDay() === 0 || date.getDay() === 6) {
+                dayCell.classList.add("weekend");
+              }
+
+              dateHeaderRow.appendChild(dayCell);
+            }
+
+            calendarEl.appendChild(dateHeaderRow);
+
+            // Create rows for each room
+            filteredRooms.forEach((room) => {
+              const roomRow = document.createElement("div");
+              roomRow.style.display = "flex";
+              roomRow.style.alignItems = "center";
+              roomRow.style.marginBottom = "5px";
+
+              const roomLabel = document.createElement("div");
+              roomLabel.textContent = `Room ${room.number}`;
+              roomLabel.style.width = "120px";
+              roomLabel.style.margin = "2px";
+              roomLabel.style.fontWeight = "bold";
+              roomLabel.style.fontSize = "13px";
+
+              // Add room type badge
+              const typeBadge = document.createElement("span");
+              typeBadge.className =
+                "room-type-badge ms-2 badge " +
+                (room.type === "single"
+                  ? "bg-info"
+                  : room.type === "double"
+                  ? "bg-primary"
+                  : "bg-warning text-dark");
+              typeBadge.textContent =
+                room.type.charAt(0).toUpperCase() + room.type.slice(1);
+              roomLabel.appendChild(typeBadge);
+
+              roomRow.appendChild(roomLabel);
+
+              // Add empty cells for days before the first of the month
+              for (let i = 0; i < firstDayOfMonth; i++) {
+                const emptyCell = document.createElement("div");
+                emptyCell.style.width = "32px";
+                emptyCell.style.margin = "2px";
+                roomRow.appendChild(emptyCell);
+              }
+
+              for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentDate.getFullYear()}-${(
+                  currentDate.getMonth() + 1
+                )
+                  .toString()
+                  .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+                const date = new Date(dateStr);
+                const dayOfWeek = date.getDay();
+
+                const isBooked = bookings.some(
+                  (booking) =>
+                    booking.roomNumber === room.number &&
+                    booking.status !== "Cancelled" &&
+                    new Date(booking.checkIn) <= date &&
+                    new Date(booking.checkOut) > date
+                );
+
+                const booking = isBooked
+                  ? bookings.find(
+                      (b) =>
+                        b.roomNumber === room.number &&
+                        new Date(b.checkIn) <= date &&
+                        new Date(b.checkOut) > date
+                    )
+                  : null;
+
+                const dayCell = document.createElement("div");
+                dayCell.className = `room-cell ${
+                  isBooked ? "booked" : "available"
+                } ${dayOfWeek === 0 || dayOfWeek === 6 ? "weekend" : ""}`;
+
+                if (isBooked && booking) {
+                  dayCell.dataset.bsToggle = "tooltip";
+                  dayCell.dataset.bsPlacement = "top";
+                  dayCell.dataset.bsTitle = `Booked by ${booking.guestName}`;
+                  dayCell.dataset.bsHtml = "true";
+                  dayCell.dataset.bsContent = `
+                                    <div class="text-start">
+                                        <strong>Status:</strong> ${
+                                          booking.status
+                                        }<br>
+                                        <strong>Dates:</strong> ${formatDate(
+                                          booking.checkIn
+                                        )} to ${formatDate(
+                    booking.checkOut
+                  )}<br>
+                                        <strong>Guests:</strong> ${
+                                          booking.numGuests
+                                        }
+                                    </div>
+                                `;
+                }
+
+                dayCell.dataset.room = room.number;
+                dayCell.dataset.date = dateStr;
+
+                dayCell.addEventListener("click", function () {
+                  if (!isBooked) {
+                    document.getElementById("roomSelect").value = room.number;
+                    document.getElementById("checkIn").value = dateStr;
+                    const nextDay = new Date(date);
+                    nextDay.setDate(date.getDate() + 1);
+                    document.getElementById("checkOut").value = nextDay
+                      .toISOString()
+                      .split("T")[0];
+
+                    // Highlight selected cell
+                    document
+                      .querySelectorAll(".room-cell.selected")
+                      .forEach((c) => c.classList.remove("selected"));
+                    this.classList.add("selected");
+
+                    // Update max guests
+                    updateMaxGuests();
+                  }
+                });
+
+                roomRow.appendChild(dayCell);
+              }
+
+              calendarEl.appendChild(roomRow);
+            });
+
+            // Initialize tooltips for booked cells
+            const bookedCells = document.querySelectorAll(".booked");
+            bookedCells.forEach((cell) => {
+              new bootstrap.Tooltip(cell, {
+                html: true,
+                title: cell.dataset.bsContent,
+              });
+            });
+
+            hideLoading();
+          }, 300);
+        }
+
+        function updateCalendarSelection() {
+          const checkIn = document.getElementById("checkIn").value;
+          const checkOut = document.getElementById("checkOut").value;
+          const roomNumber = document.getElementById("roomSelect").value;
+
+          if (!checkIn || !checkOut || !roomNumber) return;
+
+          // Clear previous selection
+          document
+            .querySelectorAll(".room-cell.selected")
+            .forEach((c) => c.classList.remove("selected"));
+
+          // Select all cells between check-in and check-out for the selected room
+          const startDate = new Date(checkIn);
+          const endDate = new Date(checkOut);
+
+          let currentDate = new Date(startDate);
+          while (currentDate < endDate) {
+            const dateStr = currentDate.toISOString().split("T")[0];
+            const cell = document.querySelector(
+              `.room-cell[data-room="${roomNumber}"][data-date="${dateStr}"]`
+            );
+            if (cell && !cell.classList.contains("booked")) {
+              cell.classList.add("selected");
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+        }
+
+        function renderBookingsTable() {
+          showLoading();
+
+          setTimeout(() => {
+            const tableBody = document.querySelector("#bookingsTable tbody");
+            tableBody.innerHTML = "";
+
+            // Filter bookings based on current filter and search
+            let filteredBookings = bookings.filter((booking) => {
+              const matchesFilter =
+                currentFilter === "all" || booking.status === currentFilter;
+              const matchesSearch =
+                currentSearch === "" ||
+                booking.guestName.toLowerCase().includes(currentSearch) ||
+                booking.roomNumber.toString().includes(currentSearch) ||
+                booking.id.toString().includes(currentSearch);
+              return matchesFilter && matchesSearch;
+            });
+
+            // Sort by check-in date (newest first)
+            filteredBookings.sort(
+              (a, b) => new Date(b.checkIn) - new Date(a.checkIn)
+            );
+
+            // Pagination
+            const totalPages = Math.ceil(
+              filteredBookings.length / bookingsPerPage
+            );
+            const startIdx = (currentPage - 1) * bookingsPerPage;
+            const paginatedBookings = filteredBookings.slice(
+              startIdx,
+              startIdx + bookingsPerPage
+            );
+
+            if (paginatedBookings.length === 0) {
+              const row = document.createElement("tr");
+              row.innerHTML = `<td colspan="7" class="text-center py-4 text-muted">No bookings found</td>`;
+              tableBody.appendChild(row);
+            } else {
+              paginatedBookings.forEach((booking) => {
+                const row = document.createElement("tr");
+                row.className = "booking-card";
+
+                const room = rooms.find((r) => r.number === booking.roomNumber);
+                const roomType = room ? room.type : "unknown";
+                const nights = Math.ceil(
+                  (new Date(booking.checkOut) - new Date(booking.checkIn)) /
+                    (1000 * 60 * 60 * 24)
+                );
+
+                row.innerHTML = `
+                                <td>${booking.id}</td>
+                                <td>
+                                    <div class="fw-bold">${
+                                      booking.guestName
+                                    }</div>
+                                    <small class="text-muted">${
+                                      booking.numGuests
+                                    } guest${
+                  booking.numGuests !== 1 ? "s" : ""
+                }</small>
+                                </td>
+                                <td>
+                                    <div>Room ${booking.roomNumber}</div>
+                                    <small class="badge ${getRoomTypeBadgeClass(
+                                      roomType
+                                    )}">${
+                  roomType.charAt(0).toUpperCase() + roomType.slice(1)
+                }</small>
+                                </td>
+                                <td>
+                                    <div>${formatDate(booking.checkIn)}</div>
+                                    <div class="small text-muted">to ${formatDate(
+                                      booking.checkOut
+                                    )}</div>
+                                </td>
+                                <td>${nights} night${
+                  nights !== 1 ? "s" : ""
+                }</td>
+                                <td><span class="badge ${getStatusBadgeClass(
+                                  booking.status
+                                )}">${booking.status}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1 edit-btn" data-id="${
+                                      booking.id
+                                    }" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info view-btn" data-id="${
+                                      booking.id
+                                    }" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            `;
+                tableBody.appendChild(row);
+              });
+            }
+
+            // Render pagination
+            renderPagination(totalPages);
+
+            // Add event listeners to edit buttons
+            document.querySelectorAll(".edit-btn").forEach((btn) => {
+              btn.addEventListener("click", function () {
+                const bookingId = parseInt(this.dataset.id);
+                editBooking(bookingId);
+              });
+            });
+
+            // Add event listeners to view buttons
+            document.querySelectorAll(".view-btn").forEach((btn) => {
+              btn.addEventListener("click", function () {
+                const bookingId = parseInt(this.dataset.id);
+                showBookingDetails(bookingId);
+              });
+            });
+
+            // Update stats
+            updateBookingStats();
+            renderAvailabilityChart();
+
+            hideLoading();
+          }, 300);
+        }
+
+        function renderPagination(totalPages) {
+          const paginationEl = document.getElementById("pagination");
+          paginationEl.innerHTML = "";
+
+          if (totalPages <= 1) return;
+
+          // Previous button
+          const prevLi = document.createElement("li");
+          prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+          prevLi.innerHTML = `<a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>`;
+          prevLi.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+              currentPage--;
+              renderBookingsTable();
+            }
+          });
+          paginationEl.appendChild(prevLi);
+
+          // Page numbers
+          const maxVisiblePages = 5;
+          let startPage = Math.max(
+            1,
+            currentPage - Math.floor(maxVisiblePages / 2)
+          );
+          let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+          if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+          }
+
+          if (startPage > 1) {
+            const firstLi = document.createElement("li");
+            firstLi.className = "page-item";
+            firstLi.innerHTML = `<a class="page-link" href="#">1</a>`;
+            firstLi.addEventListener("click", function (e) {
+              e.preventDefault();
+              currentPage = 1;
+              renderBookingsTable();
+            });
+            paginationEl.appendChild(firstLi);
+
+            if (startPage > 2) {
+              const ellipsisLi = document.createElement("li");
+              ellipsisLi.className = "page-item disabled";
+              ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+              paginationEl.appendChild(ellipsisLi);
+            }
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            const pageLi = document.createElement("li");
+            pageLi.className = `page-item ${i === currentPage ? "active" : ""}`;
+            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            pageLi.addEventListener("click", function (e) {
+              e.preventDefault();
+              currentPage = i;
+              renderBookingsTable();
+            });
+            paginationEl.appendChild(pageLi);
+          }
+
+          if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+              const ellipsisLi = document.createElement("li");
+              ellipsisLi.className = "page-item disabled";
+              ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+              paginationEl.appendChild(ellipsisLi);
+            }
+
+            const lastLi = document.createElement("li");
+            lastLi.className = "page-item";
+            lastLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+            lastLi.addEventListener("click", function (e) {
+              e.preventDefault();
+              currentPage = totalPages;
+              renderBookingsTable();
+            });
+            paginationEl.appendChild(lastLi);
+          }
+
+          // Next button
+          const nextLi = document.createElement("li");
+          nextLi.className = `page-item ${
+            currentPage === totalPages ? "disabled" : ""
+          }`;
+          nextLi.innerHTML = `<a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>`;
+          nextLi.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+              currentPage++;
+              renderBookingsTable();
+            }
+          });
+          paginationEl.appendChild(nextLi);
+        }
+
+        function updateBookingStats() {
+          const totalBookings = bookings.length;
+          const confirmed = bookings.filter(
+            (b) => b.status === "Confirmed"
+          ).length;
+          const pending = bookings.filter((b) => b.status === "Pending").length;
+          const cancelled = bookings.filter(
+            (b) => b.status === "Cancelled"
+          ).length;
+          const checkedIn = bookings.filter(
+            (b) => b.status === "Checked-In"
+          ).length;
+          const checkedOut = bookings.filter(
+            (b) => b.status === "Checked-Out"
+          ).length;
+
+          document.getElementById("bookingStats").innerHTML = `
+                    Showing <strong>${bookings.length}</strong> total bookings: 
+                    <span class="text-success">${confirmed} confirmed</span>, 
+                    <span class="text-warning">${pending} pending</span>, 
+                    <span class="text-danger">${cancelled} cancelled</span>,
+                    <span class="text-info">${checkedIn} checked-in</span>,
+                    <span class="text-secondary">${checkedOut} checked-out</span>
+                `;
+        }
+
+        function saveBooking() {
+          const form = document.getElementById("bookingForm");
+          if (!form.checkValidity()) {
+            form.classList.add("was-validated");
+            showAlert("Please fill all required fields correctly!", "danger");
+            return;
+          }
+
+          const roomNumber = parseInt(
+            document.getElementById("roomSelect").value
+          );
+          const checkIn = document.getElementById("checkIn").value;
+          const checkOut = document.getElementById("checkOut").value;
+          const numGuests = parseInt(
+            document.getElementById("numGuests").value
+          );
+
+          // Validate guest count
+          const room = rooms.find((r) => r.number === roomNumber);
+          if (numGuests > room.maxOccupancy) {
+            showAlert(
+              `This room can only accommodate ${room.maxOccupancy} guests!`,
+              "danger"
+            );
+            return;
+          }
+
+          // Check for overlapping bookings (excluding cancelled ones)
+          const isOverlapping = bookings.some(
+            (booking) =>
+              booking.roomNumber === roomNumber &&
+              booking.status !== "Cancelled" &&
+              !(
+                new Date(checkOut) <= new Date(booking.checkIn) ||
+                new Date(checkIn) >= new Date(booking.checkOut)
+              )
+          );
+
+          if (isOverlapping) {
+            showAlert(
+              "This room is already booked for the selected dates!",
+              "danger"
+            );
+            return;
+          }
+
+          const bookingObj = {
+            id:
+              bookings.length > 0
+                ? Math.max(...bookings.map((b) => b.id)) + 1
+                : 1,
+            guestName: document.getElementById("guestName").value,
+            roomNumber: roomNumber,
+            roomType: room ? room.type : "unknown",
+            roomPrice: room ? room.price : 0,
+            checkIn: checkIn,
+            checkOut: checkOut,
+            numGuests: numGuests,
+            status: document.getElementById("status").value,
+            specialRequests: document.getElementById("specialRequests").value,
+            createdAt: new Date().toISOString(),
+          };
+
+          bookings.push(bookingObj);
+          saveToLocalStorage();
+          renderCalendar();
+          renderBookingsTable();
+          newBooking();
+
+          showAlert(
+            `Booking #${bookingObj.id} has been saved successfully!`,
+            "success"
+          );
+          createConfetti();
+        }
+
+        function newBooking() {
+          document.getElementById("bookingForm").reset();
+          document.getElementById("updateBooking").disabled = true;
+          document.getElementById("deleteBooking").disabled = true;
+          document.getElementById("checkIn")._flatpickr.setDate(new Date());
+          document
+            .getElementById("checkOut")
+            ._flatpickr.setDate(new Date(new Date().getTime() + 86400000));
+          document
+            .getElementById("bookingForm")
+            .classList.remove("was-validated");
+          currentEditingId = null;
+
+          // Remove selected highlight from calendar
+          document
+            .querySelectorAll(".room-cell.selected")
+            .forEach((c) => c.classList.remove("selected"));
+        }
+
+        function editBooking(id) {
+          const booking = bookings.find((b) => b.id === id);
+          if (!booking) return;
+
+          document.getElementById("guestName").value = booking.guestName;
+          document.getElementById("roomSelect").value = booking.roomNumber;
+          document
+            .getElementById("checkIn")
+            ._flatpickr.setDate(booking.checkIn);
+          document
+            .getElementById("checkOut")
+            ._flatpickr.setDate(booking.checkOut);
+          document.getElementById("numGuests").value = booking.numGuests;
+          document.getElementById("status").value = booking.status;
+          document.getElementById("specialRequests").value =
+            booking.specialRequests;
+
+          document.getElementById("updateBooking").disabled = false;
+          document.getElementById("deleteBooking").disabled = false;
+          currentEditingId = id;
+
+          // Update max guests
+          updateMaxGuests();
+
+          // Scroll to form
+          document
+            .getElementById("bookingForm")
+            .scrollIntoView({ behavior: "smooth" });
+        }
+
+        function updateBooking() {
+          if (currentEditingId === null) return;
+
+          const form = document.getElementById("bookingForm");
+          if (!form.checkValidity()) {
+            form.classList.add("was-validated");
+            showAlert("Please fill all required fields correctly!", "danger");
+            return;
+          }
+
+          const index = bookings.findIndex((b) => b.id === currentEditingId);
+          if (index === -1) return;
+
+          const roomNumber = parseInt(
+            document.getElementById("roomSelect").value
+          );
+          const checkIn = document.getElementById("checkIn").value;
+          const checkOut = document.getElementById("checkOut").value;
+          const numGuests = parseInt(
+            document.getElementById("numGuests").value
+          );
+
+          // Validate guest count
+          const room = rooms.find((r) => r.number === roomNumber);
+          if (numGuests > room.maxOccupancy) {
+            showAlert(
+              `This room can only accommodate ${room.maxOccupancy} guests!`,
+              "danger"
+            );
+            return;
+          }
+
+          // Check for overlapping bookings (excluding current booking and cancelled ones)
+          const isOverlapping = bookings.some(
+            (booking) =>
+              booking.id !== currentEditingId &&
+              booking.roomNumber === roomNumber &&
+              booking.status !== "Cancelled" &&
+              !(
+                new Date(checkOut) <= new Date(booking.checkIn) ||
+                new Date(checkIn) >= new Date(booking.checkOut)
+              )
+          );
+
+          if (isOverlapping) {
+            showAlert(
+              "This room is already booked for the selected dates!",
+              "danger"
+            );
+            return;
+          }
+
+          bookings[index] = {
+            ...bookings[index],
+            guestName: document.getElementById("guestName").value,
+            roomNumber: roomNumber,
+            roomType: room ? room.type : "unknown",
+            roomPrice: room ? room.price : 0,
+            checkIn: checkIn,
+            checkOut: checkOut,
+            numGuests: numGuests,
+            status: document.getElementById("status").value,
+            specialRequests: document.getElementById("specialRequests").value,
+          };
+
+          saveToLocalStorage();
+          renderCalendar();
+          renderBookingsTable();
+          newBooking();
+
+          showAlert(
+            `Booking #${currentEditingId} has been updated successfully!`,
+            "success"
+          );
+        }
+
+        function deleteBooking() {
+          if (currentEditingId === null) return;
+
+          if (confirm("Are you sure you want to delete this booking?")) {
+            bookings = bookings.filter((b) => b.id !== currentEditingId);
+            saveToLocalStorage();
+            renderCalendar();
+            renderBookingsTable();
+            newBooking();
+
+            showAlert(
+              `Booking #${currentEditingId} has been deleted successfully!`,
+              "success"
+            );
+          }
+        }
+
+        function prevMonth() {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        }
+
+        function nextMonth() {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        }
+
+        function showBookingDetails(id) {
+          const booking = bookings.find((b) => b.id === id);
+          if (!booking) return;
+
+          const room = rooms.find((r) => r.number === booking.roomNumber);
+          const nights = Math.ceil(
+            (new Date(booking.checkOut) - new Date(booking.checkIn)) /
+              (1000 * 60 * 60 * 24)
+          );
+          const totalPrice = nights * (room ? room.price : 0);
+
+          const modalContent = document.getElementById("bookingDetailsContent");
+          modalContent.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Guest Information</h5>
+                            <div class="mb-2"><strong>Name:</strong> ${
+                              booking.guestName
+                            }</div>
+                            <div class="mb-2"><strong>Number of Guests:</strong> ${
+                              booking.numGuests
+                            }</div>
+                            <div class="mb-2"><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(
+                              booking.status
+                            )}">${booking.status}</span></div>
+                            <div class="mb-2"><strong>Booking ID:</strong> ${
+                              booking.id
+                            }</div>
+                            <div class="mb-2"><strong>Booked On:</strong> ${formatDateTime(
+                              booking.createdAt
+                            )}</div>
+                            
+                            <h5 class="mt-4 mb-3">Special Requests</h5>
+                            <div class="bg-light p-3 rounded">${
+                              booking.specialRequests || "None"
+                            }</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Room Information</h5>
+                            <div class="mb-2"><strong>Room Number:</strong> ${
+                              booking.roomNumber
+                            }</div>
+                            <div class="mb-2"><strong>Room Type:</strong> <span class="badge ${getRoomTypeBadgeClass(
+                              booking.roomType
+                            )}">${
+            booking.roomType.charAt(0).toUpperCase() + booking.roomType.slice(1)
+          }</span></div>
+                            <div class="mb-2"><strong>Price per Night:</strong> ₹${
+                              room ? room.price.toLocaleString("en-IN") : 0
+                            }</div>
+                            
+                            <h5 class="mt-4 mb-3">Stay Details</h5>
+                            <div class="mb-2"><strong>Check In:</strong> ${formatDate(
+                              booking.checkIn
+                            )}</div>
+                            <div class="mb-2"><strong>Check Out:</strong> ${formatDate(
+                              booking.checkOut
+                            )}</div>
+                            <div class="mb-2"><strong>Nights:</strong> ${nights}</div>
+                            <div class="mb-2"><strong>Total Price:</strong> ₹${totalPrice.toLocaleString(
+                              "en-IN"
+                            )}</div>
+                            
+                            <div class="mt-4">
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-success" style="width: ${getStayProgress(
+                                      booking.checkIn,
+                                      booking.checkOut
+                                    )}%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between small mt-1">
+                                    <span>Check In</span>
+                                    <span>Today</span>
+                                    <span>Check Out</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Booking Timeline</h5>
+                            <canvas id="timelineChart" height="200"></canvas>
+                        </div>
+                    </div>
+                `;
+
+          // Initialize the modal
+          const modal = new bootstrap.Modal(
+            document.getElementById("bookingDetailsModal")
+          );
+          modal.show();
+
+          // Store current booking ID for printing
+          currentEditingId = booking.id;
+
+          // Render timeline chart
+          renderTimelineChart(booking);
+        }
+
+        function renderTimelineChart(booking) {
+          const ctx = document.getElementById("timelineChart");
+
+          const checkIn = new Date(booking.checkIn);
+          const checkOut = new Date(booking.checkOut);
+          const today = new Date();
+
+          new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: ["Booked", "Check In", "Today", "Check Out"],
+              datasets: [
+                {
+                  data: [
+                    new Date(booking.createdAt).getTime(),
+                    checkIn.getTime(),
+                    today.getTime(),
+                    checkOut.getTime(),
+                  ],
+                  borderColor: "#4e73df",
+                  backgroundColor: "rgba(78, 115, 223, 0.05)",
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointBackgroundColor: function (context) {
+                    const index = context.dataIndex;
+                    return index === 2 ? "#e74a3b" : "#4e73df";
+                  },
+                  fill: true,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: {
+                  type: "time",
+                  time: {
+                    unit: "day",
+                    displayFormats: {
+                      day: "MMM d",
+                    },
+                  },
+                  min: new Date(
+                    new Date(booking.createdAt).getTime() - 86400000 * 2
+                  ),
+                  max: new Date(checkOut.getTime() + 86400000 * 2),
+                },
+                y: {
+                  display: false,
+                },
+              },
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const date = new Date(context.raw);
+                      return (
+                        date.toLocaleDateString() +
+                        " " +
+                        date.toLocaleTimeString()
+                      );
+                    },
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        function renderAvailabilityChart() {
+          const ctx = document.getElementById("availabilityChart");
+
+          // Destroy previous chart if it exists
+          if (availabilityChart) {
+            availabilityChart.destroy();
+          }
+
+          const roomTypeFilter =
+            document.getElementById("roomTypeFilter").value;
+          const filteredRooms =
+            roomTypeFilter === "all"
+              ? rooms
+              : rooms.filter((room) => room.type === roomTypeFilter);
+
+          const roomLabels = filteredRooms.map((room) => `Room ${room.number}`);
+          const bookedCounts = filteredRooms.map((room) => {
+            return bookings.filter(
+              (booking) =>
+                booking.roomNumber === room.number &&
+                booking.status !== "Cancelled" &&
+                new Date(booking.checkOut) > new Date()
+            ).length;
+          });
+
+          const availableCounts = filteredRooms.map((room, index) => {
+            return 1 - bookedCounts[index]; // Assuming each room can only have one active booking
+          });
+
+          availabilityChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: roomLabels,
+              datasets: [
+                {
+                  label: "Booked",
+                  data: bookedCounts,
+                  backgroundColor: "#e74a3b",
+                  borderColor: "#e74a3b",
+                  borderWidth: 1,
+                },
+                {
+                  label: "Available",
+                  data: availableCounts,
+                  backgroundColor: "#1cc88a",
+                  borderColor: "#1cc88a",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: {
+                  stacked: true,
+                },
+                y: {
+                  stacked: true,
+                  beginAtZero: true,
+                  max: 1,
+                  ticks: {
+                    stepSize: 1,
+                  },
+                },
+              },
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      return `${context.dataset.label}: ${context.raw}`;
+                    },
+                  },
+                },
+                legend: {
+                  position: "top",
+                },
+              },
+            },
+          });
+        }
+
+        function printBooking() {
+          const bookingId = currentEditingId;
+          if (!bookingId) return;
+
+          const booking = bookings.find((b) => b.id === parseInt(bookingId));
+          if (!booking) return;
+
+          const room = rooms.find((r) => r.number === booking.roomNumber);
+          const nights = Math.ceil(
+            (new Date(booking.checkOut) - new Date(booking.checkIn)) /
+              (1000 * 60 * 60 * 24)
+          );
+          const totalPrice = nights * (room ? room.price : 0);
+          const tax = totalPrice * 0.18;
+          const grandTotal = totalPrice + tax;
+
+          const printSection = document.getElementById("printSection");
+          printSection.innerHTML = `
+                    <div class="container mt-4">
+                        <div class="invoice-header text-center">
+                            <h1 class="invoice-title">GRAND PLAZA HOTEL</h1>
+                            <p class="mb-1">123 Main Street, Mumbai, India</p>
+                            <p>Phone: +91 9876543210 | Email: info@grandplaza.com</p>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Invoice</h5>
+                                        <p class="mb-1"><strong>Invoice #:</strong> ${
+                                          booking.id
+                                        }</p>
+                                        <p class="mb-1"><strong>Date:</strong> ${formatDateTime(
+                                          new Date().toISOString()
+                                        )}</p>
+                                        <p class="mb-1"><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(
+                                          booking.status
+                                        )}">${booking.status}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Guest Details</h5>
+                                        <p class="mb-1"><strong>Name:</strong> ${
+                                          booking.guestName
+                                        }</p>
+                                        <p class="mb-1"><strong>Guests:</strong> ${
+                                          booking.numGuests
+                                        }</p>
+                                        <p class="mb-1"><strong>Room:</strong> ${
+                                          booking.roomNumber
+                                        } (${
+            booking.roomType.charAt(0).toUpperCase() + booking.roomType.slice(1)
+          })</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Booking Details</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Check In:</strong></p>
+                                        <p>${formatDate(booking.checkIn)}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Check Out:</strong></p>
+                                        <p>${formatDate(booking.checkOut)}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Nights:</strong></p>
+                                        <p>${nights}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive mb-4">
+                            <table class="table print-table">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th class="text-end">Rate</th>
+                                        <th class="text-end">Nights</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Room ${booking.roomNumber} (${
+            booking.roomType.charAt(0).toUpperCase() + booking.roomType.slice(1)
+          })</td>
+                                        <td class="text-end">₹${
+                                          room
+                                            ? room.price.toLocaleString("en-IN")
+                                            : 0
+                                        }</td>
+                                        <td class="text-end">${nights}</td>
+                                        <td class="text-end">₹${totalPrice.toLocaleString(
+                                          "en-IN"
+                                        )}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                        <td class="text-end">₹${totalPrice.toLocaleString(
+                                          "en-IN"
+                                        )}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Tax (18%):</strong></td>
+                                        <td class="text-end">₹${tax.toLocaleString(
+                                          "en-IN",
+                                          { maximumFractionDigits: 2 }
+                                        )}</td>
+                                    </tr>
+                                    <tr class="print-total-row">
+                                        <td colspan="3" class="text-end"><strong>Total Amount:</strong></td>
+                                        <td class="text-end">₹${grandTotal.toLocaleString(
+                                          "en-IN",
+                                          { maximumFractionDigits: 2 }
+                                        )}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Special Requests</h5>
+                                <p>${
+                                  booking.specialRequests ||
+                                  "No special requests"
+                                }</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="signature-area">
+                                    <p class="mb-4"><strong>Guest Signature:</strong></p>
+                                    <p>_________________________</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="signature-area text-end">
+                                    <p class="mb-4"><strong>Authorized Signature:</strong></p>
+                                    <p>_________________________</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="terms-conditions">
+                            <h6>Terms & Conditions:</h6>
+                            <ul class="small">
+                                <li>Check-in time is 2:00 PM and check-out time is 12:00 PM</li>
+                                <li>Early check-in and late check-out are subject to availability</li>
+                                <li>Cancellations must be made 48 hours prior to arrival to avoid penalty</li>
+                                <li>No-show will be charged one night's room rate</li>
+                                <li>Extra bed charges may apply</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <p class="small text-muted">Thank you for choosing Grand Plaza Hotel. We hope you enjoy your stay!</p>
+                        </div>
+                    </div>
+                `;
+
+          // Print the invoice
+          setTimeout(() => {
+            window.print();
+          }, 500);
+        }
+
+        function exportToExcel() {
+          showLoading();
+
+          setTimeout(() => {
+            // Prepare data for export with better formatting
+            const exportData = bookings.map((booking) => {
+              const room = rooms.find((r) => r.number === booking.roomNumber);
+              const nights = Math.ceil(
+                (new Date(booking.checkOut) - new Date(booking.checkIn)) /
+                  (1000 * 60 * 60 * 24)
+              );
+              const totalPrice = nights * (room ? room.price : 0);
+
+              return {
+                "Booking ID": booking.id,
+                "Guest Name": booking.guestName,
+                "Room Number": booking.roomNumber,
+                "Room Type":
+                  booking.roomType.charAt(0).toUpperCase() +
+                  booking.roomType.slice(1),
+                "Check In": formatDate(booking.checkIn),
+                "Check Out": formatDate(booking.checkOut),
+                Nights: nights,
+                "Price/Night": room ? room.price : 0,
+                "Total Price": totalPrice,
+                "Number of Guests": booking.numGuests,
+                Status: booking.status,
+                "Special Requests": booking.specialRequests || "None",
+                "Booked On": formatDateTime(booking.createdAt),
+              };
+            });
+
+            // Create worksheet with custom headers
+            const ws = XLSX.utils.json_to_sheet(exportData);
+
+            // Add styling to the worksheet
+            if (!ws["!cols"]) ws["!cols"] = [];
+
+            // Set column widths
+            ws["!cols"] = [
+              { wch: 10 },
+              { wch: 20 },
+              { wch: 12 },
+              { wch: 12 },
+              { wch: 12 },
+              { wch: 12 },
+              { wch: 8 },
+              { wch: 12 },
+              { wch: 12 },
+              { wch: 10 },
+              { wch: 12 },
+              { wch: 25 },
+              { wch: 20 },
+            ];
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Bookings");
+
+            // Add a summary sheet
+            const summaryData = [
+              ["Hotel Booking Summary", "", "", ""],
+              ["Generated On", new Date().toLocaleString(), "", ""],
+              ["Total Bookings", bookings.length, "", ""],
+              [
+                "Confirmed Bookings",
+                bookings.filter((b) => b.status === "Confirmed").length,
+                "",
+                "",
+              ],
+              [
+                "Pending Bookings",
+                bookings.filter((b) => b.status === "Pending").length,
+                "",
+                "",
+              ],
+              [
+                "Cancelled Bookings",
+                bookings.filter((b) => b.status === "Cancelled").length,
+                "",
+                "",
+              ],
+              [
+                "Checked-In Bookings",
+                bookings.filter((b) => b.status === "Checked-In").length,
+                "",
+                "",
+              ],
+              [
+                "Checked-Out Bookings",
+                bookings.filter((b) => b.status === "Checked-Out").length,
+                "",
+                "",
+              ],
+              ["", "", "", ""],
+              ["Room Type", "Count", "Average Nights", "Total Revenue (₹)"],
+              ...["single", "double", "suite"].map((type) => {
+                const typeBookings = bookings.filter(
+                  (b) => b.roomType === type && b.status !== "Cancelled"
+                );
+                const count = typeBookings.length;
+                const avgNights =
+                  count > 0
+                    ? (
+                        typeBookings.reduce(
+                          (sum, b) =>
+                            sum +
+                            Math.ceil(
+                              (new Date(b.checkOut) - new Date(b.checkIn)) /
+                                (1000 * 60 * 60 * 24)
+                            ),
+                          0
+                        ) / count
+                      ).toFixed(1)
+                    : 0;
+                const revenue = typeBookings.reduce((sum, b) => {
+                  const room = rooms.find((r) => r.number === b.roomNumber);
+                  const nights = Math.ceil(
+                    (new Date(b.checkOut) - new Date(b.checkIn)) /
+                      (1000 * 60 * 60 * 24)
+                  );
+                  return sum + nights * (room ? room.price : 0);
+                }, 0);
+
+                return [
+                  type.charAt(0).toUpperCase() + type.slice(1),
+                  count,
+                  avgNights,
+                  revenue,
+                ];
+              }),
+              [
+                "Total",
+                "",
+                "",
+                bookings
+                  .filter((b) => b.status !== "Cancelled")
+                  .reduce((sum, b) => {
+                    const room = rooms.find((r) => r.number === b.roomNumber);
+                    const nights = Math.ceil(
+                      (new Date(b.checkOut) - new Date(b.checkIn)) /
+                        (1000 * 60 * 60 * 24)
+                    );
+                    return sum + nights * (room ? room.price : 0);
+                  }, 0),
+              ],
+            ];
+
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+
+            // Style summary sheet
+            wsSummary["!cols"] = [
+              { wch: 20 },
+              { wch: 15 },
+              { wch: 15 },
+              { wch: 15 },
+            ];
+
+            // Merge title cells
+            wsSummary["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
+
+            // Add summary sheet to workbook
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+
+            // Export to file with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+            XLSX.writeFile(wb, `Hotel_Bookings_${timestamp}.xlsx`);
+
+            showAlert("Excel export generated successfully!", "success");
+            hideLoading();
+          }, 500);
+        }
+
+        function saveToLocalStorage() {
+          localStorage.setItem("hotelBookings", JSON.stringify(bookings));
+        }
+
+        function showAlert(message, type) {
+          // Remove any existing alerts first
+          const existingAlert = document.querySelector(".alert-position");
+          if (existingAlert) {
+            existingAlert.remove();
+          }
+
+          const alert = document.createElement("div");
+          alert.className = `alert alert-${type} alert-dismissible fade show alert-position`;
+          alert.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+          document.body.appendChild(alert);
+
+          // Auto-dismiss after 3 seconds
+          setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+          }, 3000);
+        }
+
+        function createConfetti() {
+          for (let i = 0; i < 100; i++) {
+            const confetti = document.createElement("div");
+            confetti.className = "confetti";
+            confetti.style.left = Math.random() * 100 + "vw";
+            confetti.style.backgroundColor = `hsl(${
+              Math.random() * 360
+            }, 100%, 50%)`;
+            confetti.style.width = Math.random() * 10 + 5 + "px";
+            confetti.style.height = Math.random() * 10 + 5 + "px";
+            document.body.appendChild(confetti);
+
+            setTimeout(() => {
+              confetti.remove();
+            }, 5000);
+          }
+        }
+
+        function showLoading() {
+          document.getElementById("loadingSpinner").style.display = "flex";
+        }
+
+        function hideLoading() {
+          document.getElementById("loadingSpinner").style.display = "none";
+        }
+
+        function quickBooking() {
+          // Scroll to booking form
+          document
+            .getElementById("bookingForm")
+            .scrollIntoView({ behavior: "smooth" });
+
+          // Highlight the form
+          const formCard = document.querySelector(".card");
+          formCard.classList.add("pulse");
+          setTimeout(() => {
+            formCard.classList.remove("pulse");
+          }, 2000);
+
+          // Show quick help tooltip
+          showAlert(
+            "Quick booking activated! Select dates and room to create a booking.",
+            "info"
+          );
+        }
+
+        function formatDate(dateStr) {
+          const date = new Date(dateStr);
+          return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        }
+
+        function formatDateTime(dateStr) {
+          const date = new Date(dateStr);
+          return date.toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+
+        function getStatusBadgeClass(status) {
+          switch (status) {
+            case "Confirmed":
+              return "bg-success";
+            case "Pending":
+              return "bg-warning text-dark";
+            case "Cancelled":
+              return "bg-danger";
+            case "Checked-In":
+              return "bg-info";
+            case "Checked-Out":
+              return "bg-secondary";
+            default:
+              return "bg-light text-dark";
+          }
+        }
+
+        function getRoomTypeBadgeClass(type) {
+          switch (type) {
+            case "single":
+              return "bg-info";
+            case "double":
+              return "bg-primary";
+            case "suite":
+              return "bg-warning text-dark";
+            default:
+              return "bg-light text-dark";
+          }
+        }
+
+        function getStayProgress(checkInStr, checkOutStr) {
+          const checkIn = new Date(checkInStr);
+          const checkOut = new Date(checkOutStr);
+          const today = new Date();
+
+          if (today < checkIn) return 0;
+          if (today > checkOut) return 100;
+
+          const totalDuration = checkOut - checkIn;
+          const elapsed = today - checkIn;
+          return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+        }
+      });
+    </script>
+  </body>
+</html>
